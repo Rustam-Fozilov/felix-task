@@ -10,7 +10,7 @@ class Warehouses extends Model
 {
     use HasFactory;
 
-    public $fillable = [
+    protected $fillable = [
         'material_id',
         'reminder',
         'price',

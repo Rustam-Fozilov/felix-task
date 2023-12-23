@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreProductRequest;
+use App\Http\Resources\ProductResource;
+use App\Http\Resources\WarehouseResource;
 use App\Models\Material;
 use App\Models\Warehouses;
 use Illuminate\Http\JsonResponse;
@@ -12,21 +14,63 @@ class ProductController extends Controller
 {
     public function store(StoreProductRequest $request)
     {
-        $product_material = null;
-        $product_name = $request['product_name'];
-        $product_qty = $request['product_qty'];
-        $materials = $request['materials'];
 
-        $response = Warehouses::query()
-            ->join('materials', 'materials.id', '=', 'warehouses.material_id')
-            ->where('materials.id', '=', 1)
-            ->get();
+        $productsData = [];
 
-        if ($response[0]['reminder'] >= $product_qty) {
-           $response[0]['qty'] = $product_qty;
-        } else {
-            $product_material = $response[0]['reminder'];
+        foreach ($request['products'] as $product) {
+            $productsData[] = [
+                'product_name' => $product['product_name'],
+                'product_qty' => $product['product_qty'],
+                'product_materials' => [],
+            ];
+
+            foreach ($product['materials'] as $material) {
+                $warehouse = Warehouses::with('material')
+                    ->where('material_id', '=', $material['id'])
+                    ->first();
+
+                if ($warehouse['reminder'] < $material['qty']) {
+                    $warehouseResource = new WarehouseResource($warehouse);
+                    $productsData[0]['product_materials'][] = $warehouseResource->resolve();
+
+                    $warehouse = Warehouses::with('material')
+                        ->where('material_id', '=', $material['id'])
+                        ->where('id', '!=', $warehouse['id'])
+                        ->where('reminder', '>=', $material['qty'])
+                        ->first();
+                }
+
+                if (is_null($warehouse)) {
+                    $warehouse = Warehouses::with('material')
+                        ->where('material_id', '=', $material['id'])
+                        ->first();
+
+                    $warehouse = Warehouses::with('material')
+                        ->where('material_id', '=', $material['id'])
+                        ->where('id', '!=', $warehouse['id'])
+                        ->where('reminder', '<=', $material['qty'])
+                        ->first();
+
+                    $productsData[0]['product_materials'][] = [
+                        'warehouse_id' => null,
+                        'material_name' => $warehouse['material']['name'],
+                        'qty' => $material['qty'] - $productsData[0]['product_materials'][count($productsData[0]['product_materials']) - 1]['qty'],
+                        'price' => null
+                    ];
+
+                } else {
+                    $qty = $material['qty'] - $productsData[0]['product_materials'][count($productsData[0]['product_materials']) - 1]['qty'];
+
+                    $productsData[0]['product_materials'][] = [
+                        'warehouse_id' => $warehouse['id'],
+                        'material_name' => $warehouse['material']['name'],
+                        'qty' => $qty,
+                        'price' => $warehouse['price']
+                    ];
+                }
+            }
         }
-//        return response()->json('');
+
+        return response($productsData);
     }
 }

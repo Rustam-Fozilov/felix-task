@@ -9,7 +9,7 @@ class MaterialProduct extends Model
 {
     use HasFactory;
 
-    public $fillable = [
+    protected $fillable = [
         'product_id',
         'material_id',
         'quantity',

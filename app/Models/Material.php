@@ -11,7 +11,7 @@ class Material extends Model
 {
     use HasFactory;
 
-    public $fillable = ['name'];
+    protected $fillable = ['name'];
 
     public function warehouses(): HasMany
     {
