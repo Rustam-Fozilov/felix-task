@@ -15,4 +15,4 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::resource('product', ProductController::class);
+Route::post('products', ProductController::class);
