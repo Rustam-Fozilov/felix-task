@@ -1,0 +1,28 @@
+{
+    "products": [
+        {
+            "product_name": "koylak",
+            "product_qty": 30,
+            "materials": [
+                {
+                    "id": 1,
+                    "qty": 300
+                },
+                {
+                    "id": 2,
+                    "qty": 150
+                }
+            ]
+        },
+        {
+            "product_name": "shim",
+            "product_qty": 20,
+            "materials": [
+                {
+                    "id": 3,
+                    "qty": 600
+                }
+            ]
+        }
+    ]
+}

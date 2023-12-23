@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
+    /* Request jo'natish uchun body forma namunasi request-body.txt faylida ko'rsatilgan */
     public function __invoke(StoreProductRequest $request): JsonResponse
     {
         $productsData = [];
@@ -77,7 +78,7 @@ class ProductController extends Controller
                 'price' => null,
             ];
         } else {
-            /* Ombordan kerakli materiallar topilsa saqlab qo'yish */
+            /* Ombordan kerakli materiallar topilsa ularni saqlab qo'yish */
             $qty = $material['qty'] - end($productData['product_materials'])['qty'];
 
             $productData['product_materials'][] = [
